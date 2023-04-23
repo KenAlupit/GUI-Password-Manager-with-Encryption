@@ -11,15 +11,14 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+//An object class that contains the name, username, and password
 public class PasswordContainer implements java.io.Serializable{
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private String username;
 	private byte[] password;
-	
 	private SecretKey myDesKey;
 	private transient Cipher desCipher;
-	
 	
 	PasswordContainer(){
 		this.name = null;
@@ -33,18 +32,27 @@ public class PasswordContainer implements java.io.Serializable{
 		}
 	}
 	
+	//Returns the name variable
 	public String getName() {
 		return name;
 	}
+	
+	//Sets the name variable
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	//Returns the username variable
 	public String getUsername() {
 		return username;
 	}
+	
+	//Sets the username variable
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	
+	//Returns the unencrypted byte array value of the password
 	public byte[] getPassword() {
 		try {
 		 	if (myDesKey == null) {
@@ -62,6 +70,8 @@ public class PasswordContainer implements java.io.Serializable{
         }
 		return this.password;
 	}
+	
+	//Encrypts the password and sets it
 	public void setPassword(byte[] password) {
 		 try {
 			 	if (myDesKey == null) {
@@ -76,34 +86,38 @@ public class PasswordContainer implements java.io.Serializable{
 	        	e.printStackTrace();
 	        }
 	}
-	 private void writeObject(ObjectOutputStream out) throws IOException {
-	        out.defaultWriteObject();
-	        if (myDesKey != null) {
-	            out.writeObject(myDesKey.getEncoded());
-	        }
-	    }
-
-	    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-	        in.defaultReadObject();
-	        byte[] encodedKey = (byte[]) in.readObject();
-	        if (encodedKey != null) {
-	            myDesKey = new SecretKeySpec(encodedKey, "AES");
-	        }
-	        try {
-	            desCipher = Cipher.getInstance("AES");
-	        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
-	    private Cipher getCipher() {
-	        if (desCipher == null) {
-	            try {
-	                desCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-	            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-	                e.printStackTrace();
-	            }
-	        }
-	        return desCipher;
-	    }
+	
+	//Saves the secret key for serialization
+	private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        if (myDesKey != null) {
+            out.writeObject(myDesKey.getEncoded());
+        }
+    }
+	
+	//Retrieves the secret key for deserialization
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        byte[] encodedKey = (byte[]) in.readObject();
+        if (encodedKey != null) {
+            myDesKey = new SecretKeySpec(encodedKey, "AES");
+        }
+        try {
+            desCipher = Cipher.getInstance("AES");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //Returns the cipher
+    private Cipher getCipher() {
+        if (desCipher == null) {
+            try {
+                desCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+                e.printStackTrace();
+            }
+        }
+        return desCipher;
+    }
 }
